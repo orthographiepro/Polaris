@@ -11,7 +11,7 @@ from importlib import import_module
 def main(conf):
     pl.seed_everything(conf.seed)
     output_dir = HydraConfig.get().runtime.output_dir
-    checkpoint = to_absolute_path("last.ckpt")
+    checkpoint = to_absolute_path("Polaris.ckpt")
     assert os.path.exists(checkpoint), f"Checkpoint {checkpoint} does not exist"
 
     trainer = pl.Trainer(

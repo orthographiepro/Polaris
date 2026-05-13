@@ -7,7 +7,7 @@ from src.datamodule.av2_extractor import Av2Extractor
 
 
 def glob_files(data_root: Path, mode: str):
-    file_root = data_root / mode
+    file_root = data_root / mode / "raw" # compatability with QCNet format
     scenario_files = list(file_root.rglob("*.parquet"))
     return scenario_files
 
@@ -16,8 +16,8 @@ def preprocess(args):
     batch = args.batch
     data_root = Path(args.data_root)
 
-    for mode in ["train", "val", "test"]:
-        save_dir = data_root / "Polaris_processed" / mode
+    for mode in ["val", "test"]: # w/o "train",
+        save_dir = Path() / "data" / "Polaris_processed" / mode
         extractor = Av2Extractor(save_path=save_dir, mode=mode)
 
         save_dir.mkdir(exist_ok=True, parents=True)
