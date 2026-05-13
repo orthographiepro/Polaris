@@ -10,13 +10,13 @@ seed: 2024
 monitor: val_minFDE6
 save_top_k: 10
 
-data_root:
-checkpoint:
+data_root: /workspaces/datasets/av2_mp/Polaris_processed
+checkpoint: /workspaces/Polaris/Polaris.ckpt
 pretrained_weights:
 output: change_${datamodule.name}_${datamodule.phase}_${model.name}_${model.phase}
 
 num_workers: 4
-gpus: 8  # when test, only use 1 gpu
+gpus: 2  # when test, only use 1 gpu
 sync_bn: true
 batch_size: 6
 epochs: 60

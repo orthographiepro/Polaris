@@ -7,7 +7,7 @@ protobuf==3.19.0
 rich==12.4.4
 wandb==0.13.5
 plotly
-matplotlib==3.4.3
+matplotlib
 timm
 plotly
-torchmetrics==0.10.2
+torchmetrics
