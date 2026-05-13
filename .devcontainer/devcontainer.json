@@ -16,8 +16,7 @@
             "extensions": [
                 "ms-python.python",
                 "ms-python.vscode-pylance",
-                ""
-                // Add any other extensions you need (e.g., Jupyter, GitLens)
+                "google.geminicodeassist",
             ]
         }
     },
