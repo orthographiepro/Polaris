@@ -303,7 +303,18 @@ class Trainer(pl.LightningModule):
             out['y_hat'] = out['y_hat_new_new']
         if out['pi_new_new'] is not None:
             out['pi'] = out['pi_new_new']
-        self.submission_handler.format_data(data, out["y_hat"], out["pi"])
+        # self.submission_handler.format_data(data, out["y_hat"], out["pi"])
+
+        # Slice out the focal agent (index 0) to get the other agents for each batch item
+        other_track_ids = [ids[1:] for ids in data.get("agent_ids", [])] if "agent_ids" in data else None
+        if batch_idx == 0:
+            print(data.keys(), out.keys())
+        self.submission_handler.format_data(
+            data, out["y_hat"], out["pi"],
+            y_hat_others=out.get("y_hat_others"),
+            other_track_ids=other_track_ids
+        )
+
 
     def on_test_end(self) -> None:
         if self.pre_ensemble:
@@ -518,4 +529,14 @@ class StreamTrainer(Trainer):
                 with open(f'save_for_en/{ensemble_num}/{scenario_id}_with_{track_id}.pkl', 'wb') as outp: 
                     pickle.dump(data_info, outp)
         else:
-            self.submission_handler.format_data(data[-1], all_outs[-1]["y_hat"], all_outs[-1]["pi"])
+            #self.submission_handler.format_data(data[-1], all_outs[-1]["y_hat"], all_outs[-1]["pi"])
+            # Slice out the focal agent (index 0) to get the other agents for each batch item
+            
+            other_track_ids = [ids[1:] for ids in data[-1].get("agent_ids", [])] if "agent_ids" in data[-1] else None
+            self.submission_handler.format_data(
+                data[-1], 
+                all_outs[-1]["y_hat"], 
+                all_outs[-1]["pi"],
+                y_hat_others=all_outs[-1].get("y_hat_others"),
+                other_track_ids=other_track_ids
+            )

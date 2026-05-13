@@ -1,6 +1,7 @@
 import time
 from pathlib import Path
 import torch
+import numpy as np
 from av2.datasets.motion_forecasting.eval.submission import ChallengeSubmission
 from torch import Tensor
 
@@ -18,6 +19,8 @@ class SubmissionAv2:
         probability: Tensor,
         normalized_probability=False,
         inference=False,
+        y_hat_others: Tensor = None,
+        other_track_ids: list = None,
     ) -> None:
         """
         trajectory: (B, M, 60, 2)
@@ -49,8 +52,16 @@ class SubmissionAv2:
             if not normalized_probability:
                 probability = torch.softmax(probability.double(), dim=-1)
 
+            if y_hat_others is not None:
+                global_y_hat_others = (
+                    torch.matmul(y_hat_others[..., :2].double(), rotate_mat.unsqueeze(1))
+                    + origin
+                )
+
         global_trajectory = global_trajectory.detach().cpu().numpy()
         probability = probability.detach().cpu().numpy()
+        if y_hat_others is not None:
+            global_y_hat_others = global_y_hat_others.detach().cpu().numpy()
 
         if inference:
             return global_trajectory, probability
@@ -59,6 +70,15 @@ class SubmissionAv2:
             self.challenge_submission.predictions[scene_id] = {
                 track_id: (global_trajectory[i], probability[i])
             }
+            
+            if y_hat_others is not None and other_track_ids is not None:
+                for j, other_track_id in enumerate(other_track_ids[i]):
+                    if not other_track_id:  # skip padded or missing track IDs
+                        continue
+                    # Other agents have 1 predicted mode, so we format trajectory as (1, 60, 2)
+                    other_traj = global_y_hat_others[i, j][np.newaxis, ...]
+                    other_prob = np.array([1.0])
+                    self.challenge_submission.predictions[scene_id][other_track_id] = (other_traj, other_prob)
 
     def generate_submission_file(self):
         print("generating submission file for argoverse 2 motion forecasting challenge")
